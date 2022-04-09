@@ -12,7 +12,7 @@ const port = 8080
 // Se conecta al host y puerto especificados.
 socket.connect({
   host: 'localhost',
-  port: port
+  port
 })
 
 // Indicamos la codificación
