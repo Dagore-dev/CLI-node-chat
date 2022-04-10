@@ -1,4 +1,6 @@
 const { Server } = require('net')
+const connections = require('../connections')
+const sendMessage = require('./sendMessage')
 const error = require('./error')
 
 function listen (port = 8080) {
@@ -8,6 +10,7 @@ function listen (port = 8080) {
   // Ejecuta el callback cuando le llega una nueva conexión al servidor.
   server.on('connection', (socket) => {
     const clientSocket = `${socket.remoteAddress}:${socket.remotePort}`
+    let isLogged = connections.has(socket)
     console.log(`New connection on ${clientSocket}`)
 
     // Se indica la codificación que usa la conexión. Así el buffer de bytes se parsea directamente.
@@ -15,10 +18,19 @@ function listen (port = 8080) {
 
     // Dispara un callback con información que el cliente escribe en el socket.
     socket.on('data', (message) => {
-      if (message !== 'END') {
-        console.log(`${clientSocket} => ${message}`)
+      if (!isLogged) {
+        connections.set(socket, message)
+        socket.write(`Connection succeded. Welcome to the chat ${message}`)
+        isLogged = true
       } else {
-        socket.end()
+        if (message !== 'END') {
+          const fullMessage = `${connections.get(socket)} => ${message}`
+          console.log(fullMessage)
+          sendMessage(fullMessage, socket)
+        } else {
+          connections.delete(socket)
+          socket.end()
+        }
       }
     })
 

@@ -1,7 +1,7 @@
 const listen = require('./helpers/listen.js')
 
 function main () {
-  const port = process.argv[2]
+  const [, , port] = process.argv
 
   if (port && !isNaN(port)) {
     listen(port)
